@@ -1,174 +1,554 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#153b50">
-  <title>施設利用料金区分 判定アプリ</title>
-  <style>
-    :root { --navy:#153b50; --muted:#64748b; --line:#dbe4ea; --bg:#f3f7f9; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:#172b3a; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
-    header { background:var(--navy); color:white; padding:28px 18px; text-align:center; }
-    header h1 { margin:0 0 8px; font-size:clamp(1.25rem,4vw,1.8rem); }
-    header p { margin:0; opacity:.9; font-size:.94rem; }
-    main { width:min(760px, calc(100% - 28px)); margin:24px auto 48px; }
-    .panel { background:white; border:1px solid var(--line); border-radius:16px; padding:22px; margin:16px 0; box-shadow:0 5px 18px #18384b0b; }
-    h2 { font-size:1.12rem; margin:0 0 16px; }
-    .step { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:#e5f1f6; color:var(--navy); font-weight:800; margin-right:8px; }
-    .choices { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; }
-    label.choice { display:flex; gap:10px; align-items:center; border:1px solid var(--line); border-radius:11px; padding:14px; cursor:pointer; min-height:54px; }
-    label.choice:has(input:checked) { border:2px solid #26799a; background:#f0f8fb; padding:13px; }
-    input[type=radio] { accent-color:#26799a; width:18px; height:18px; flex:none; }
-    .hint { color:var(--muted); font-size:.9rem; line-height:1.6; margin:10px 0 0; }
-    .fee-wrap { display:flex; align-items:center; gap:10px; }
-    input[type=number] { width:100%; max-width:260px; padding:13px; border:1px solid #bdcbd4; border-radius:10px; font:inherit; font-size:1.05rem; }
-    .yen { color:var(--muted); }
-    button { border:0; border-radius:10px; padding:13px 20px; font:inherit; font-weight:700; cursor:pointer; }
-    .primary { background:var(--navy); color:white; width:100%; margin-top:18px; }
-    .secondary { background:#e8eef2; color:#243b4a; }
-    button:focus-visible, input:focus-visible { outline:3px solid #83c9e3; outline-offset:2px; }
-    #result { display:none; }
-    #result.show { display:block; }
-    .result-card { border-radius:14px; padding:22px; text-align:center; color:#102a39; }
-    .result-card h2 { margin:0 0 8px; }
-    .result-card .category { font-size:clamp(1.8rem,7vw,2.5rem); font-weight:900; margin:8px 0; }
-    .commercial { background:#ffeadf; border:2px solid #ef6b2c; }
-    .middle { background:#e9f6e4; border:2px solid #56a83c; }
-    .normal { background:#e2f4fb; border:2px solid #159bd0; }
-    .other { background:#f1f0fa; border:2px solid #8b83c5; }
-    .details { margin-top:14px; color:#425466; font-size:.94rem; line-height:1.7; }
-    .warning { background:#fff8e8; border:1px solid #f1d38a; border-radius:10px; padding:13px; color:#694b12; line-height:1.6; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
-    footer { color:var(--muted); font-size:.82rem; text-align:center; padding:0 10px 30px; line-height:1.6; }
-    [hidden] { display:none !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>都城市中心市街地中核施設｜施設利用料金判定</title>
+
+<style>
+:root {
+  --navy:#16324f;
+  --blue:#2563eb;
+  --light:#f4f7fb;
+  --line:#d9e1ea;
+  --green:#16845b;
+  --green-bg:#eaf8f1;
+  --red:#c83b3b;
+  --red-bg:#fff0f0;
+  --text:#1f2937;
+  --muted:#64748b;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:var(--light);
+  font-family:"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  color:var(--text);
+  line-height:1.7;
+}
+
+header {
+  background:linear-gradient(135deg,var(--navy),#24527b);
+  color:white;
+  padding:28px 20px;
+}
+
+.header-inner,.container,footer {
+  max-width:980px;
+  margin:auto;
+}
+
+h1 {
+  font-size:24px;
+  margin:0 0 6px;
+}
+
+.subtitle {
+  font-size:14px;
+  opacity:.9;
+}
+
+.container {
+  margin-top:28px;
+  padding:0 18px;
+}
+
+.card {
+  background:white;
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 5px 18px rgba(15,23,42,.06);
+  padding:28px;
+  margin-bottom:20px;
+}
+
+.card-title {
+  font-size:21px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.description {
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:20px;
+}
+
+.step-label {
+  font-size:13px;
+  color:var(--blue);
+  font-weight:700;
+  margin-bottom:7px;
+}
+
+.progress {
+  height:8px;
+  background:#e7edf4;
+  border-radius:99px;
+  overflow:hidden;
+  margin:8px 0 24px;
+}
+
+.progress-bar {
+  height:100%;
+  background:var(--blue);
+  transition:width .3s;
+}
+
+h2 {
+  font-size:21px;
+  margin:0 0 12px;
+}
+
+.help {
+  font-size:13px;
+  color:var(--muted);
+  background:#f8fafc;
+  border-left:4px solid #94a3b8;
+  padding:10px 13px;
+  margin-bottom:18px;
+}
+
+.options {
+  display:grid;
+  gap:12px;
+}
+
+button.option {
+  width:100%;
+  text-align:left;
+  background:white;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px 18px;
+  font:inherit;
+  color:var(--text);
+  cursor:pointer;
+  transition:.2s;
+}
+
+button.option:hover {
+  border-color:var(--blue);
+  background:#f8fbff;
+}
+
+button.option:active {
+  transform:scale(.99);
+}
+
+.option-code {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:#eaf1ff;
+  color:var(--blue);
+  font-weight:700;
+  margin-right:10px;
+}
+
+.option-title {
+  font-weight:700;
+}
+
+.option-desc {
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin:6px 0 0 44px;
+}
+
+.actions {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+
+.btn {
+  border:0;
+  border-radius:10px;
+  padding:11px 18px;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn-primary {
+  background:var(--blue);
+  color:white;
+}
+
+.btn-secondary {
+  background:#eef2f7;
+  color:var(--text);
+}
+
+.result {
+  border-radius:14px;
+  padding:24px;
+  border:1px solid;
+  margin-top:18px;
+}
+
+.result.profit {
+  background:var(--red-bg);
+  border-color:#f0b6b6;
+}
+
+.result.middle {
+  background:#fff8e8;
+  border-color:#f1d79a;
+}
+
+.result.normal {
+  background:var(--green-bg);
+  border-color:#a7dfc6;
+}
+
+.result-label {
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+}
+
+.result h2 {
+  font-size:30px;
+  margin:2px 0 10px;
+}
+
+.result.profit h2 { color:var(--red); }
+.result.middle h2 { color:#a66a00; }
+.result.normal h2 { color:var(--green); }
+
+.reason {
+  background:white;
+  border-radius:10px;
+  padding:14px 16px;
+  margin-top:14px;
+  font-size:14px;
+}
+
+footer {
+  padding:0 18px 35px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.hidden { display:none; }
+
+@media(max-width:640px) {
+  header { padding:22px 16px; }
+  h1 { font-size:20px; }
+  .container {
+    margin-top:18px;
+    padding:0 12px;
+  }
+  .card { padding:20px; }
+  h2 { font-size:19px; }
+  .result h2 { font-size:26px; }
+}
+</style>
 </head>
+
 <body>
+
 <header>
-  <h1>施設利用料金区分 判定アプリ</h1>
-  <p>ムジカホール・茶霧茶霧ギャラリー</p>
+  <div class="header-inner">
+    <h1>都城市中心市街地中核施設</h1>
+    <div class="subtitle">
+      施設利用料金 自動判定システム（職員窓口用）
+    </div>
+  </div>
 </header>
-<main>
-  <section class="panel">
-    <h2><span class="step">1</span>利用する施設を選択</h2>
-    <div class="choices">
-      <label class="choice"><input type="radio" name="facility" value="ムジカホール">ムジカホール</label>
-      <label class="choice"><input type="radio" name="facility" value="茶霧茶霧ギャラリー">茶霧茶霧ギャラリー</label>
-      <label class="choice"><input type="radio" name="facility" value="その他">その他</label>
-    </div>
-    <p class="hint">「その他」は施設共通フローチャートでの確認が必要です。今回の資料にはその判定条件が含まれていないため、このアプリでは別扱いにしています。</p>
-  </section>
 
-  <section class="panel" id="purposePanel">
-    <h2><span class="step">2</span>利用目的・内容を選択</h2>
-    <div class="choices">
-      <label class="choice"><input type="radio" name="purpose" value="enterprise">企業利用（文化利用を除く）</label>
-      <label class="choice"><input type="radio" name="purpose" value="sales">主な内容が営業・販売</label>
-      <label class="choice"><input type="radio" name="purpose" value="members">会員招待のみ（一般の観客は含まない）</label>
-      <label class="choice"><input type="radio" name="purpose" value="culture">文化利用（企業団体も含む）</label>
-      <label class="choice"><input type="radio" name="purpose" value="other">その他</label>
-    </div>
-  </section>
+<main class="container">
 
-  <section class="panel" id="feePanel">
-    <h2><span class="step">3</span>入場料はいくらですか？</h2>
-    <p class="hint">当日券を含む最高料金を入力してください。</p>
-    <div class="fee-wrap">
-      <input id="fee" type="number" min="0" step="1" inputmode="numeric" placeholder="例：1500" aria-label="入場料（円）">
-      <span class="yen">円</span>
-    </div>
-  </section>
+<div class="card" id="app">
 
-  <button class="primary" id="judgeBtn" type="button">料金区分を判定する</button>
+  <div class="step-label" id="stepLabel">STEP 1 / 3</div>
 
-  <section class="panel" id="result" aria-live="polite">
-    <div id="resultCard" class="result-card">
-      <h2>判定結果</h2>
-      <div class="category" id="category"></div>
-      <div id="resultSummary"></div>
-    </div>
-    <div class="details" id="details"></div>
-    <div class="actions">
-      <button class="secondary" id="resetBtn" type="button">最初からやり直す</button>
-    </div>
-  </section>
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"
+      style="width:33.33%"></div>
+  </div>
+
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+
+</div>
+
 </main>
-<footer>
-  本アプリは提供されたフローチャートをもとにした判定補助ツールです。<br>
-  実際の料金決定・適用にあたっては、施設の最新の利用規程・担当窓口でご確認ください。
-</footer>
-<script>
-  const $ = (id) => document.getElementById(id);
-  const selected = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
 
-  function showResult(type, title, summary, detail) {
-    const card = $("resultCard");
-    card.className = `result-card ${type}`;
-    $("category").textContent = title;
-    $("resultSummary").textContent = summary;
-    $("details").textContent = detail;
-    $("result").classList.add("show");
-    $("result").scrollIntoView({ behavior: "smooth", block: "center" });
+<footer>
+  <strong>〖重要〗</strong>
+  このシステムは職員窓口での判定を補助するためのものです。
+  実際の利用許可・料金区分は、最新の条例・管理運用規程・
+  施設内運用ルール等を確認して決定してください。
+</footer>
+
+<script>
+"use strict";
+
+const OTHER_URL =
+"https://kotokotokotokoto0428-hub.github.io/new_dantai/";
+
+let step = 1;
+let facility = "";
+let purpose = "";
+let history = [];
+
+const questionArea = document.getElementById("questionArea");
+const resultArea = document.getElementById("resultArea");
+const stepLabel = document.getElementById("stepLabel");
+const progressBar = document.getElementById("progressBar");
+
+function updateProgress() {
+  stepLabel.textContent = `STEP ${step} / 3`;
+  progressBar.style.width = `${step / 3 * 100}%`;
+}
+
+function saveHistory() {
+  history.push({
+    step,
+    facility,
+    purpose
+  });
+}
+
+function goBack() {
+  if (!history.length) return;
+
+  const previous = history.pop();
+
+  step = previous.step;
+  facility = previous.facility;
+  purpose = previous.purpose;
+
+  showStep();
+}
+
+function selectFacility(value) {
+  saveHistory();
+  facility = value;
+  step = 2;
+  showStep();
+}
+
+function selectPurpose(value) {
+  purpose = value;
+
+  if (value === "企業利用" ||
+      value === "営業・販売") {
+    showResult("営利料金");
+    return;
   }
 
-  $("judgeBtn").addEventListener("click", () => {
-    const facility = selected("facility");
-    const purpose = selected("purpose");
-    const feeText = $("fee").value.trim();
+  saveHistory();
+  step = 3;
+  showStep();
+}
 
-    if (!facility) { alert("利用する施設を選択してください。"); return; }
-    if (facility === "その他") {
-      showResult("other", "施設共通フローチャートへ", "この施設の判定は別フローチャートで確認してください。",
-        "STEP1で「その他」を選択した場合は、施設共通フローチャートへ進みます。共通フローチャートの内容は今回のPDFに含まれていません。");
-      return;
-    }
-    if (!purpose) { alert("利用目的・内容を選択してください。"); return; }
+function selectFee(value) {
+  showResult(value);
+}
 
-    if (purpose === "enterprise" || purpose === "sales") {
-      showResult("commercial", "営利料金", `${facility} ／ 利用目的・内容による判定`,
-        purpose === "enterprise"
-          ? "企業利用（文化利用を除く）のため、入場料にかかわらず営利料金です。"
-          : "主な内容が営業・販売のため、入場料にかかわらず営利料金です。");
-      return;
-    }
+function makeOption(number, title, desc, action) {
+  return `
+    <button class="option" onclick="${action}">
+      <span class="option-code">${number}</span>
+      <span class="option-title">${title}</span>
+      ${desc ? `<span class="option-desc">${desc}</span>` : ""}
+    </button>
+  `;
+}
 
-    if (feeText === "" || !Number.isFinite(Number(feeText)) || Number(feeText) < 0) {
-      alert("当日券を含む最高入場料を0円以上で入力してください。"); return;
-    }
-    const fee = Number(feeText);
-    if (!Number.isInteger(fee)) { alert("入場料は1円単位の整数で入力してください。"); return; }
+function showStep() {
 
-    if (purpose === "members") {
-      if (fee >= 2001) {
-        showResult("commercial", "営利料金", `${facility} ／ 会員招待のみ ／ ${fee.toLocaleString("ja-JP")}円`,
-          "会員招待のみ（一般の観客は含まない）で、入場料が2,001円以上のため営利料金です。");
-      } else {
-        showResult("middle", "中段料金", `${facility} ／ 会員招待のみ ／ ${fee.toLocaleString("ja-JP")}円`,
-          "会員招待のみ（一般の観客は含まない）で、入場料が2,000円以下のため中段料金です。");
-      }
-      return;
-    }
+  updateProgress();
 
-    // 文化利用・その他
-    if (fee >= 2001) {
-      showResult("commercial", "営利料金", `${facility} ／ ${purpose === "culture" ? "文化利用" : "その他"} ／ ${fee.toLocaleString("ja-JP")}円`,
-        "入場料が2,001円以上のため営利料金です。");
-    } else if (fee >= 501) {
-      showResult("middle", "中段料金", `${facility} ／ ${purpose === "culture" ? "文化利用" : "その他"} ／ ${fee.toLocaleString("ja-JP")}円`,
-        "入場料が501円～2,000円のため中段料金です。");
+  resultArea.classList.add("hidden");
+  questionArea.classList.remove("hidden");
+
+  if (step === 1) {
+
+    questionArea.innerHTML = `
+      <div class="card-title">
+        利用する施設を選択してください
+      </div>
+
+      <div class="description">
+        該当する施設を選択してください。
+      </div>
+
+      <div class="options">
+
+        ${makeOption(1,"ムジカホール","","selectFacility('ムジカホール')")}
+
+        ${makeOption(2,"茶霧茶霧ギャラリー","","selectFacility('茶霧茶霧ギャラリー')")}
+
+        ${makeOption(3,"その他","施設共通フローチャートへ移動します","location.href=OTHER_URL")}
+
+      </div>
+    `;
+  }
+
+  else if (step === 2) {
+
+    questionArea.innerHTML = `
+      <div class="step-label">STEP 2</div>
+
+      <div class="card-title">
+        利用目的・内容を確認してください
+      </div>
+
+      <div class="help">
+        利用内容に最も近いものを選択してください。
+      </div>
+
+      <div class="options">
+
+        ${makeOption(1,"企業利用","※文化利用を除く","selectPurpose('企業利用')")}
+
+        ${makeOption(2,"主な内容が営業・販売","","selectPurpose('営業・販売')")}
+
+        ${makeOption(3,"会員招待のみ","※一般の観客は含まない","selectPurpose('会員招待のみ')")}
+
+        ${makeOption(4,"文化利用","※企業団体も含む","selectPurpose('文化利用')")}
+
+        ${makeOption(5,"その他","","selectPurpose('その他')")}
+
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="goBack()">
+          ← 戻る
+        </button>
+      </div>
+    `;
+  }
+
+  else if (step === 3) {
+
+    const memberOnly = purpose === "会員招待のみ";
+
+    let options = "";
+
+    if (memberOnly) {
+
+      options += makeOption(
+        1,"2,001円以上","","selectFee('営利料金')"
+      );
+
+      options += makeOption(
+        2,"2,000円以下","","selectFee('中段料金')"
+      );
+
     } else {
-      showResult("normal", "通常料金", `${facility} ／ ${purpose === "culture" ? "文化利用" : "その他"} ／ ${fee.toLocaleString("ja-JP")}円`,
-        "入場料が500円以下のため通常料金です。");
-    }
-  });
 
-  $("resetBtn").addEventListener("click", () => {
-    document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
-    $("fee").value = "";
-    $("result").classList.remove("show");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+      options += makeOption(
+        1,"2,001円以上","","selectFee('営利料金')"
+      );
+
+      options += makeOption(
+        2,"501円～2,000円","","selectFee('中段料金')"
+      );
+
+      options += makeOption(
+        3,"500円以下","","selectFee('通常料金')"
+      );
+
+    }
+
+    questionArea.innerHTML = `
+      <div class="step-label">STEP 3</div>
+
+      <div class="card-title">
+        入場料はいくらですか？
+      </div>
+
+      <div class="help">
+        ※当日券を含む最高料金を適用してください。
+      </div>
+
+      <div class="options">
+        ${options}
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="goBack()">
+          ← 戻る
+        </button>
+      </div>
+    `;
+  }
+}
+
+function showResult(value) {
+
+  stepLabel.textContent = "判定結果";
+  progressBar.style.width = "100%";
+
+  questionArea.classList.add("hidden");
+  resultArea.classList.remove("hidden");
+
+  let resultClass = "profit";
+
+  if (value === "中段料金") {
+    resultClass = "middle";
+  }
+
+  if (value === "通常料金") {
+    resultClass = "normal";
+  }
+
+  resultArea.innerHTML = `
+    <div class="card-title">
+      判定結果
+    </div>
+
+    <div class="description">
+      以下の料金区分に該当します。
+    </div>
+
+    <div class="result ${resultClass}">
+
+      <div class="result-label">
+        判定された料金区分
+      </div>
+
+      <h2>${value}</h2>
+
+      <div class="reason">
+        <strong>利用施設：</strong>${facility}<br>
+        <strong>利用目的：</strong>${purpose}
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="restart()">
+        最初からやり直す
+      </button>
+    </div>
+  `;
+}
+
+function restart() {
+  step = 1;
+  facility = "";
+  purpose = "";
+  history = [];
+  showStep();
+}
+
+showStep();
+
 </script>
 </body>
 </html>
